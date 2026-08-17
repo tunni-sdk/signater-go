@@ -1,12 +1,3 @@
-// Package signater is the official Go SDK for the Signater e-signature API.
-//
-// See https://docs.api.signater.com for the API documentation.
-//
-// A Client is created with NewClient and authenticated with an API token from
-// the API Tokens section of the Signater App. Sandbox mode is selected by the
-// token itself: sandbox tokens automatically route to sandbox resources.
-//
-//	client := signater.NewClient(signater.WithAPIToken(token))
 package signater
 
 import (

@@ -2,6 +2,7 @@ package signater
 
 import (
 	"context"
+	"encoding/json"
 	"iter"
 	"net/http"
 	"net/url"
@@ -19,6 +20,27 @@ type ContactService struct {
 // IdentityDocumentType is the kind of identity document attached to a contact
 // or signer.
 type IdentityDocumentType string
+
+// UnmarshalJSON accepts both the documented string form and the numeric form
+// the live API returns when the value is unset (0), observed empirically on
+// the envelope signer response. Unknown numbers are preserved as their
+// decimal string.
+func (t *IdentityDocumentType) UnmarshalJSON(data []byte) error {
+	s := string(data)
+	switch {
+	case len(data) > 0 && data[0] == '"':
+		var v string
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		*t = IdentityDocumentType(v)
+	case s == "null", s == "0":
+		*t = ""
+	default:
+		*t = IdentityDocumentType(s)
+	}
+	return nil
+}
 
 // Identity document types accepted by the API.
 const (

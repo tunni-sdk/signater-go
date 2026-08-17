@@ -1,0 +1,20 @@
+linters:
+  enable:
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    - misspell
+    - revive
+    - gosec
+    - errorlint
+    - bodyclose
+
+issues:
+  exclude-rules:
+    # Test helpers intentionally ignore Close/Write errors on scripted fakes.
+    - path: _test\.go
+      linters:
+        - errcheck
+        - gosec

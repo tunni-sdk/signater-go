@@ -32,7 +32,9 @@ type EnvelopeParams struct {
 	// ToBePublishedAt schedules the publication. Times are serialized in
 	// RFC 3339 with their offset; prefer UTC values (time.Time.UTC).
 	ToBePublishedAt *time.Time `json:"toBePublishedAtUtc,omitempty"`
-	// Language of the envelope.
+	// Language of the envelope. REQUIRED by the live API despite the spec
+	// marking it optional (verified in sandbox: omitting it returns 400
+	// "'Language' has a range of values which does not include '0'").
 	Language Language `json:"language,omitempty"`
 	// MarkupOrientation controls where document information is stamped.
 	MarkupOrientation MarkupOrientation `json:"markupOrientation,omitempty"`
@@ -59,7 +61,8 @@ type EnvelopeParams struct {
 // envelope.
 type EnvelopeDocumentParams struct {
 	// ID of the document (from DocumentService.Upload or
-	// CreateFromTemplate). Required.
+	// CreateFromTemplate). Required. A document can belong to only one
+	// envelope, even one in the trash — upload a new document per envelope.
 	ID string `json:"id"`
 	// Name of the document (2-200 characters). Required.
 	Name string `json:"name"`
@@ -88,10 +91,16 @@ type EnvelopeSignerParams struct {
 	// Title of the signer, e.g. "Lawyer".
 	Title *string `json:"title,omitempty"`
 	// EmailCommunicationMode controls email messages to the signer.
+	// REQUIRED by the live API (verified in sandbox: omitting any
+	// communication mode returns 400 "range of values which does not
+	// include '0'"). Use CommunicationModeNone to disable the channel.
 	EmailCommunicationMode CommunicationMode `json:"emailCommunicationMode,omitempty"`
-	// SmsCommunicationMode controls SMS messages to the signer.
+	// SmsCommunicationMode controls SMS messages to the signer. REQUIRED by
+	// the live API; use CommunicationModeNone to disable the channel.
 	SmsCommunicationMode CommunicationMode `json:"smsCommunicationMode,omitempty"`
 	// WhatsAppCommunicationMode controls WhatsApp messages to the signer.
+	// REQUIRED by the live API; use CommunicationModeNone to disable the
+	// channel.
 	WhatsAppCommunicationMode CommunicationMode `json:"whatsAppCommunicationMode,omitempty"`
 	// PhoneIDD is the signer's international dialing code, e.g. 55 for
 	// Brazil.

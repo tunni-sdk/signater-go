@@ -129,6 +129,24 @@ func TestEnvelopeUpdateSerializesIDsAndCollections(t *testing.T) {
 	}
 }
 
+func TestSignerDocumentTypeToleratesNumericZero(t *testing.T) {
+	// Observed in sandbox: the live API returns documentType as the number 0
+	// when unset on envelope signers (instead of null or a string).
+	c, tr := newTestClient(t)
+	tr.Enqueue(http.StatusOK, `{"id":"e1","status":"Draft","signers":[{"id":"s1","documentType":0},{"id":"s2","documentType":"BrazilianCpf"}]}`, nil)
+
+	env, err := c.Envelopes.Get(context.Background(), "e1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if env.Signers[0].DocumentType != "" {
+		t.Errorf("unset documentType = %q, want empty", env.Signers[0].DocumentType)
+	}
+	if env.Signers[1].DocumentType != IdentityDocumentBrazilianCpf {
+		t.Errorf("documentType = %q", env.Signers[1].DocumentType)
+	}
+}
+
 func TestEnvelopeGet(t *testing.T) {
 	const fixture = `{
 	  "id": "env-1",
