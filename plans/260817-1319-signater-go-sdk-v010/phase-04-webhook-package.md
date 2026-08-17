@@ -73,10 +73,10 @@ func SignPayload(payload []byte, secret string) http.Header // for consumer test
 
 ## Success Criteria
 
-- [ ] All 13 event constants exactly match doc strings
-- [ ] `ConstructEvent` rejects tampered payloads and accepts either signature header
-- [ ] `SignPayload` helper lets consumers unit-test their handlers without real secrets
-- [ ] Package compiles standalone (`go build ./webhook`), stdlib only
+- [x] All 13 event constants exactly match doc strings
+- [x] `ConstructEvent` rejects tampered payloads and accepts either signature header
+- [x] `SignPayload` helper lets consumers unit-test their handlers without real secrets
+- [x] Package compiles standalone (`go build ./webhook`), stdlib only
 
 ## Risk Assessment
 

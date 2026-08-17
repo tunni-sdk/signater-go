@@ -54,12 +54,19 @@ Template (`template.go`): POST `/v1/ecm/templates`, GET/PUT/DELETE `/v1/ecm/temp
 
 ## Success Criteria
 
-- [ ] All 27 routes callable and tested against fixture payloads from the docs; boxes checked in [routes-checklist.md](./routes-checklist.md)
-- [ ] `ListAutoPaging` works on every list endpoint
-- [ ] Vault dual-update exposed as `Update` (PUT) + `UpdatePartial` (PATCH) with clear doc comments
-- [ ] Naming/conventions consistent across the three files (this is the template for Phase 3)
+- [x] All 27 routes callable and tested against fixture payloads from the docs; boxes checked in [routes-checklist.md](./routes-checklist.md)
+- [x] `ListAutoPaging` works on every list endpoint
+- [x] Vault dual-update exposed as `Update` (PUT) + `UpdatePartial` (PATCH) with clear doc comments
+- [x] Naming/conventions consistent across the three files (this is the template for Phase 3)
 
 ## Risk Assessment
 
 - Doc fragments are Apidog-generated; a schema may disagree with the live API. Where example and schema conflict, trust the example and leave a `// NOTE:` doc comment. Empirical sandbox validation happens in Phase 5 quickstart.
 - Vault "list" family has overlapping semantics (account vs user vs contents) — method names must disambiguate: `ListAccount`, `ListMine`, `ListByUser`, `Contents`.
+
+## Implementation Notes (as built)
+
+- `Create` methods return `(id string, error)` — DELIBERATE deviation from the `(*Contact, error)` sketch: the API returns only `{id}`, and a struct with one real field and a dozen zero fields is the worse footgun. Revisit before v1.0.0 if sandbox shows richer create responses.
+- Vault owners/members paths are `/v1/ecm/vaults/owners` and `/v1/ecm/vaults/members` (no `{vaultId}`) per the published fragments, despite descriptions saying "a specific vault" — implemented as documented, marked `VERIFY(sandbox)`. Shared shape extracted as `AccountUser` (also used by `Envelopes.ListAvailableOwners`).
+- `Templates.Restore(ctx, id, vaultID)` sends the required `{"vaultId"}` body (caught in review — the fragment declares `RestoreTemplateApiRequest`).
+- Hardening from review: `pathEscape` percent-encodes all-dot segments; `validatePath` centrally rejects empty ids (`errEmptyResourceID`); auto-paging iterators snapshot params once (no lazy re-reads); `VaultParams.MemberIDs` has no `omitempty` so an empty slice can clear members on the full-replace PUT; params use value slices (`[]T`, not `[]*T`).

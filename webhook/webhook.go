@@ -4,15 +4,25 @@
 // 30s up to 5 times). Configure webhooks and obtain the signing secret at
 // https://app.signater.com/account/webhooks.
 //
-// Typical usage inside an HTTP handler:
+// Typical usage inside an HTTP handler (bound read, generic error response):
 //
-//	payload, _ := io.ReadAll(r.Body)
+//	payload, err := io.ReadAll(http.MaxBytesReader(w, r.Body, 1<<20))
+//	if err != nil {
+//		http.Error(w, "bad request", http.StatusBadRequest)
+//		return
+//	}
 //	event, err := webhook.ConstructEvent(payload, r.Header, secret)
-//	if err != nil { http.Error(w, "bad signature", http.StatusBadRequest); return }
+//	if err != nil {
+//		http.Error(w, "bad request", http.StatusBadRequest) // don't echo err
+//		return
+//	}
 //	switch event.Type { case webhook.EventEnvelopeSigned: ... }
 //
-// Signater does not guarantee event delivery order; process webhooks
-// asynchronously and query the API for the current resource state.
+// Signater does not guarantee event delivery order, and Hookdeck retries mean
+// deliveries are at-least-once: handlers must be idempotent and should dedupe
+// (RequestID is the natural key). The signature carries no timestamp, so a
+// captured delivery can be replayed; treat events as hints and query the API
+// for the current resource state.
 package webhook
 
 import (
@@ -60,9 +70,16 @@ type Event struct {
 	// SignerID is the signer involved, present only on *_by_signer events.
 	//
 	// VERIFY(sandbox): the docs state the signer id is included but do not
-	// show its JSON key; confirm against a captured payload.
+	// show its JSON key; confirm against a captured payload. Until then,
+	// Raw preserves the full delivery for fields this SDK does not model.
 	SignerID string `json:"signer_id,omitempty"`
+	// Raw is the verbatim delivery payload, for fields not modeled above.
+	Raw json.RawMessage `json:"-"`
 }
+
+// RequestID returns the delivery's request-id header, the natural key for
+// deduplicating at-least-once deliveries. Empty when the header is absent.
+func RequestID(h http.Header) string { return h.Get("Request-Id") }
 
 // Signature and authentication headers.
 const (
@@ -84,6 +101,10 @@ var (
 	// ErrAPIKeyMismatch is returned when the x-signater-apikey header does
 	// not match the expected key.
 	ErrAPIKeyMismatch = errors.New("webhook: x-signater-apikey mismatch")
+	// ErrNoSecret is returned when the signing secret (or expected api key)
+	// is empty — verification must fail closed, never accept forgeable
+	// signatures computed with an empty key.
+	ErrNoSecret = errors.New("webhook: signing secret is empty")
 )
 
 // ParseEvent decodes a webhook payload WITHOUT verifying its authenticity.
@@ -96,6 +117,7 @@ func ParseEvent(payload []byte) (*Event, error) {
 	if e.Type == "" {
 		return nil, errors.New("webhook: payload has no event_type")
 	}
+	e.Raw = append(json.RawMessage(nil), payload...)
 	return &e, nil
 }
 
@@ -115,8 +137,15 @@ func ConstructEvent(payload []byte, h http.Header, secret string) (*Event, error
 }
 
 // VerifyHookdeckSignature checks the delivery's HMAC signature against
-// secret, accepting either the primary or the rotated-secret header.
+// secret, accepting either the primary or the rotated-secret header. An empty
+// secret is rejected (ErrNoSecret): HMAC with an empty key is forgeable.
+//
+// Header lookup is canonicalized — build headers with http.Header.Set (as
+// net/http does), not a map literal with lowercase keys.
 func VerifyHookdeckSignature(payload []byte, h http.Header, secret string) error {
+	if secret == "" {
+		return ErrNoSecret
+	}
 	sigs := make([]string, 0, 2)
 	if s := h.Get(hookdeckSignatureHeader); s != "" {
 		sigs = append(sigs, s)
@@ -127,7 +156,7 @@ func VerifyHookdeckSignature(payload []byte, h http.Header, secret string) error
 	if len(sigs) == 0 {
 		return ErrMissingSignature
 	}
-	expected := Sign(payload, secret)
+	expected := sign(payload, secret)
 	for _, sig := range sigs {
 		if hmac.Equal([]byte(sig), []byte(expected)) {
 			return nil
@@ -140,8 +169,11 @@ func VerifyHookdeckSignature(payload []byte, h http.Header, secret string) error
 // account api key shown on the webhook configuration page, in constant time.
 // It is a weaker check than VerifyHookdeckSignature (the key is static and
 // does not cover the payload) — use it only when no signing secret is
-// configured.
+// configured. An empty expected key is rejected (ErrNoSecret).
 func VerifyAPIKey(h http.Header, apiKey string) error {
+	if apiKey == "" {
+		return ErrNoSecret
+	}
 	got := h.Get(apiKeyHeader)
 	if got == "" || subtle.ConstantTimeCompare([]byte(got), []byte(apiKey)) != 1 {
 		return ErrAPIKeyMismatch
@@ -149,9 +181,11 @@ func VerifyAPIKey(h http.Header, apiKey string) error {
 	return nil
 }
 
-// Sign computes the base64 HMAC-SHA256 signature of payload with secret, as
-// Hookdeck does. Exposed for the testing helpers.
-func Sign(payload []byte, secret string) string {
+// sign computes the base64 HMAC-SHA256 signature of payload with secret, as
+// Hookdeck does. Unexported: the scheme is still VERIFY(sandbox)-unconfirmed,
+// and consumers verifying by string comparison would reintroduce the timing
+// side channel this package avoids. Use SignPayload to generate test headers.
+func sign(payload []byte, secret string) string {
 	mac := hmac.New(sha256.New, []byte(secret))
 	mac.Write(payload)
 	return base64.StdEncoding.EncodeToString(mac.Sum(nil))

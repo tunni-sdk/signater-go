@@ -3,6 +3,7 @@ package webhook
 import (
 	"errors"
 	"net/http"
+	"strings"
 	"testing"
 )
 
@@ -75,10 +76,53 @@ func TestConstructEventTamperedPayload(t *testing.T) {
 	payload := []byte(docPayload)
 	h := SignPayload(payload, "secret-1")
 
-	tampered := append([]byte(nil), payload...)
-	tampered[len(tampered)-2] = 'X'
+	// Flip one character inside envelope_id: still valid JSON, semantically
+	// different — the MAC must cover meaningful content.
+	tampered := []byte(strings.Replace(string(payload), "696d0b7f", "696d0b7e", 1))
 	if _, err := ConstructEvent(tampered, h, "secret-1"); !errors.Is(err, ErrInvalidSignature) {
 		t.Errorf("err = %v, want ErrInvalidSignature", err)
+	}
+}
+
+func TestConstructEventEmptySecretFailsClosed(t *testing.T) {
+	// HMAC with an empty key is computable by anyone; verification must
+	// reject it instead of accepting a forgeable signature.
+	payload := []byte(docPayload)
+	h := SignPayload(payload, "")
+	if _, err := ConstructEvent(payload, h, ""); !errors.Is(err, ErrNoSecret) {
+		t.Errorf("err = %v, want ErrNoSecret", err)
+	}
+}
+
+func TestVerifyHookdeckSignatureLowercaseMapLiteralFailsClosed(t *testing.T) {
+	// Headers built as map literals with lowercase keys are not canonical
+	// and are deliberately invisible to lookup — must fail closed.
+	payload := []byte(docPayload)
+	h := http.Header{"x-hookdeck-signature": {sign(payload, "s")}}
+	if err := VerifyHookdeckSignature(payload, h, "s"); !errors.Is(err, ErrMissingSignature) {
+		t.Errorf("err = %v, want ErrMissingSignature", err)
+	}
+}
+
+func TestParseEventPreservesRaw(t *testing.T) {
+	payload := `{"envelope_id":"e1","event_type":"envelope.created","signerId":"unmodeled-key"}`
+	e, err := ParseEvent([]byte(payload))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(e.Raw) != payload {
+		t.Errorf("Raw = %s", e.Raw)
+	}
+}
+
+func TestRequestID(t *testing.T) {
+	h := http.Header{}
+	h.Set("request-id", "|6b1bc96c.09a8251c.")
+	if got := RequestID(h); got != "|6b1bc96c.09a8251c." {
+		t.Errorf("RequestID = %q", got)
+	}
+	if got := RequestID(http.Header{}); got != "" {
+		t.Errorf("RequestID(empty) = %q", got)
 	}
 }
 
@@ -100,7 +144,7 @@ func TestVerifyHookdeckSignatureRotatedSecondHeader(t *testing.T) {
 	payload := []byte(docPayload)
 	h := http.Header{}
 	h.Set("X-Hookdeck-Signature", "invalid-old-signature")
-	h.Set("X-Hookdeck-Signature-2", Sign(payload, "rotated-secret"))
+	h.Set("X-Hookdeck-Signature-2", sign(payload, "rotated-secret"))
 
 	if err := VerifyHookdeckSignature(payload, h, "rotated-secret"); err != nil {
 		t.Errorf("rotated secret in second header must verify, got %v", err)

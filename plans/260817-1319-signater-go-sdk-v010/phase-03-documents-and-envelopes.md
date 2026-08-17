@@ -65,14 +65,24 @@ const (
 
 ## Success Criteria
 
-- [ ] Envelope create with nested signers/sign-marks/MFA marshals byte-identical to the doc example (fixture test)
-- [ ] All 9 `EnvelopeStatus` constants match API strings
-- [ ] Multipart upload streams (no `io.ReadAll` of the file) and decodes the returned document id
-- [ ] 302 endpoints return pre-signed URL without downloading the file
-- [ ] Publish 402 → `PaymentRequiredError{ShouldBuy}` (tested)
+- [x] Envelope create with nested signers/sign-marks/MFA marshals byte-identical to the doc example (fixture test)
+- [x] All 9 `EnvelopeStatus` constants match API strings
+- [x] Multipart upload streams (no `io.ReadAll` of the file) and decodes the returned document id
+- [x] 302 endpoints return pre-signed URL without downloading the file
+- [x] Publish 402 → `PaymentRequiredError{ShouldBuy}` (tested)
 
 ## Risk Assessment
 
 - This phase is ~50% of total effort; the deep params tree is the main defect surface — fixture-based marshal tests are mandatory, not optional.
 - MFA factor list includes "upcoming" factors per docs — implement only factors present in the current schema; leave enum open (string type, not closed enum) so new factors don't break decoding.
 - `Update envelope` restrictions (no doc changes after approvals) are server-side — surface via `ValidationError`, do not pre-validate client-side (KISS).
+
+## Implementation Notes (as built)
+
+- `Documents.Upload(ctx, fileName, io.Reader)` — single-part multipart per the spec; single attempt (stream not replayable); synchronizes with its writer goroutine so the caller's reader is never touched after return.
+- `doRedirectURL` applies the normal GET retry policy and resolves relative `Location` values; expected-redirect violation and missing Location are explicit errors.
+- `ProcessCertificate` sends `{}` — the only lifecycle verb whose fragment declares a JSON request body. `VERIFY(sandbox)`.
+- `EnvelopeParams.Signers/Documents` and `SignMarks` have no `omitempty`: PUT is a full replace, so an empty non-nil slice must reach the wire to clear a collection (review finding, mirrors `MemberIDs`).
+- Public fields use Go initialisms: `SchemaJSON`, `ValueJSON`, `SignMarkSchemaJSON` (tags unchanged).
+- Params time fields serialize in RFC 3339 with offset; docs recommend UTC values.
+- Review score 8/10 after fixes; field-for-field schema fidelity confirmed against the fragments (all enums verified: 9 statuses, 13 sign-mark types, 11 action types, 6 languages, etc.).
