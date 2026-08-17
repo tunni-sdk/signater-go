@@ -1,0 +1,143 @@
+# Signater API
+
+## Docs
+- [Introduction](https://docs.api.signater.com/introduction-800430m0.md): 
+- [Concepts](https://docs.api.signater.com/concepts-801899m0.md): 
+- [Authentication](https://docs.api.signater.com/authentication-799772m0.md): 
+- [Webhooks](https://docs.api.signater.com/webhooks-799774m0.md): 
+- [Envelope lifecycle](https://docs.api.signater.com/envelope-lifecycle-799776m0.md): 
+- [Error handling](https://docs.api.signater.com/error-handling-799773m0.md): 
+
+## API Docs
+- Contact [List contacts](https://docs.api.signater.com/list-contacts-12252667e0.md): Retrieves a list of contacts stored in the system. Contacts serve as a tool to streamline the creation of signers, allowing you to reuse previously registered information without needing to input it from scratch.
+- Contact [Create contact](https://docs.api.signater.com/create-contact-12252668e0.md): Creates a new contact in the system by accepting essential details such as name, email, and other optional metadata. This endpoint is designed to store reusable information that can streamline the process of assigning contacts as signers. Ensure all required fields are provided in the request payload.
+- Contact [Get contact](https://docs.api.signater.com/get-contact-12252669e0.md): Retrieves detailed information about a specific contact by its unique identifier. This endpoint is useful for viewing or validating contact data before creating or updating related entities. Ensure the provided contact ID exists in the system.
+- Contact [Update contact](https://docs.api.signater.com/update-contact-12252670e0.md): Updates the details of an existing contact in the system using its unique identifier. This endpoint allows modifications to fields such as name, email, or other associated metadata. Ensure the contact ID provided exists and that the payload contains the updated information.
+- Contact [Remove contact](https://docs.api.signater.com/remove-contact-12252671e0.md): Permanently removes a specific contact from the system using its unique identifier. This operation is irreversible and cannot be undone. Ensure the provided contact ID exists and is valid before proceeding.
+- Contact [Favorite contact](https://docs.api.signater.com/favorite-contact-12252672e0.md): Marks a specific contact as a favorite for the logged-in user using its unique identifier. This action is user-specific and does not affect the preferences of other users within the same account. Ensure the provided contact ID exists and is valid.
+- Contact [Unfavorite contact](https://docs.api.signater.com/unfavorite-contact-12252673e0.md): Removes the favorite status from a specific contact for the logged-in user using its unique identifier. This action is user-specific and does not impact the preferences of other users within the same account. Ensure the provided contact ID exists and is valid.
+- Document [Upload document](https://docs.api.signater.com/upload-document-12252674e0.md): Uploads a document to the system and returns a unique document ID. This ID must be used in subsequent operations for creating or editing an envelope. If the document is not used within 24 hours, it will be automatically removed from the system's storage.
+- Document [Create document from template](https://docs.api.signater.com/create-document-from-template-12252675e0.md): Creates a new document by applying a predefined template, which can be customized with specific data. The endpoint will return a unique document ID, which must be used for further operations such as signing or editing. If the document is not used within 24 hours, it will be automatically removed from the system's storage.
+- Document [Get document original file URL](https://docs.api.signater.com/get-document-original-file-url-13038397e0.md): Returns the URL to download the original file of a document.
+- Document [Get document signed file URL](https://docs.api.signater.com/get-document-signed-file-url-13038398e0.md): Returns the URL to download the signed file of a document.
+- Envelope [Get envelope certificate file](https://docs.api.signater.com/get-envelope-certificate-file-13038399e0.md): Returns the URL to download the certificate file of an envelope. The certificate contains the audit logs associated with the envelope, including the approval status, timestamps, and other relevant information.
+- Envelope [Process envelope certificate](https://docs.api.signater.com/process-envelope-certificate-12252680e0.md): Requests the reprocessing of the envelope's certificate, which contains the audit logs associated with the envelope. This process ensures that the latest version of the certificate is generated, reflecting any updates or changes made to the envelope. Note that the system automatically processes the certificate file whenever necessary. Ensure the provided envelope ID is valid and the envelope is in a state that allows certificate reprocessing.
+- Envelope [Download an attachment uploaded by a signer](https://docs.api.signater.com/download-an-attachment-uploaded-by-a-signer-35224678e0.md): Returns a 302 redirect to a pre-signed URL for the attachment file uploaded by a signer to an Attachment SignMark.
+- Envelope [Download a signer's simple-selfie image](https://docs.api.signater.com/download-a-signers-simple-selfie-image-35224679e0.md): Returns a 302 redirect to a short-lived pre-signed URL for the simple-selfie image captured during signer validation. Only available for signers whose envelope enforced simple-selfie validation.
+- Envelope [Get envelope](https://docs.api.signater.com/get-envelope-12252676e0.md): Retrieves detailed information about a specific envelope using its unique identifier. The response includes the envelope's status, associated documents, signers, and other relevant metadata. Ensure the provided envelope ID exists and is valid before making the request.
+- Envelope [Update envelope](https://docs.api.signater.com/update-envelope-12252677e0.md): Updates the details of an existing envelope, such as adding or removing documents, modifying signers, or changing other associated metadata. Be aware that modifications to documents will not be allowed if any signer has already approved the envelope, nor will you be able to change signers who have already approved the envelope. The updated envelope will retain its unique identifier, and changes can be tracked in subsequent operations. Ensure the provided envelope ID exists and the request contains the necessary changes.
+- Envelope [Remove envelope](https://docs.api.signater.com/remove-envelope-12252678e0.md): Removes an existing envelope using its unique identifier. Be aware that this operation is reversible. The envelope will be temporarily placed in the trash, and can be restored if needed. If the envelope contains approved documents or signers, these will not be affected by the removal. Ensure the provided envelope ID exists and is valid before performing this action.
+- Envelope [Create envelope](https://docs.api.signater.com/create-envelope-12252679e0.md): Creates a new envelope containing one or more documents and associated signers. The envelope can be used for document signing or other related workflows. Upon creation, the envelope will be assigned a unique identifier for future operations such as tracking, signing, or editing. Ensure all required fields, including documents and signers, are provided in the request payload.
+- Envelope [List available envelope owners](https://docs.api.signater.com/list-available-envelope-owners-12252681e0.md): Retrieves a list of available envelope owners who are eligible to manage or own the specified envelope.
+- Envelope [Change envelope user account owner](https://docs.api.signater.com/change-envelope-user-account-owner-12252682e0.md): Changes the ownership of the existing envelope using its unique identifier to a different user. This operation transfers all associated permissions and responsibilities from the current owner to the new one. Be aware that the new owner must have the appropriate permissions to take ownership of the envelope.
+- Envelope [Rename envelope](https://docs.api.signater.com/rename-envelope-12252683e0.md): Renames an existing envelope using its unique identifier. This operation allows the user to change the envelope's name for better organization or clarity. Be aware that renaming the envelope does not affect its contents or associated signers, and the envelope's unique ID remains unchanged. Ensure the provided envelope ID exists and is valid before performing this action.
+- Envelope [Move envelope](https://docs.api.signater.com/move-envelope-12252684e0.md): Moves an existing envelope using its unique identifier to a vault for secure storage. All envelopes are stored within a vault, and this operation ensures the envelope is properly relocated within the system. Be aware that the envelope's contents and associated signers are not affected by this action, and the envelope's unique ID remains unchanged. Ensure the provided envelope ID exists and is valid before performing this action.
+- Envelope [Publish envelope](https://docs.api.signater.com/publish-envelope-12252685e0.md): Publishes an existing envelope using its unique identifier, making it available for the signers. Once published, the signers associated with the envelope will receive access links for signing the documents. Ensure that the account has sufficient credits and that the envelope contains at least one signer and one document before performing this action.
+- Envelope [Unschedule envelope publication](https://docs.api.signater.com/unschedule-envelope-publication-12252686e0.md): Unschedules an existing envelope publication using its unique identifier, changing its status to 'hold'. Allowing it can be rescheduled or directly published at a later time if needed.
+- Envelope [Hold envelope](https://docs.api.signater.com/hold-envelope-12252687e0.md): Holds an existing envelope using its unique identifier, changing its status to 'hold'. Once holded, all signers will be prevented from approving or rejecting the envelope. This action effectively pauses the envelope's approval process, and it can be published at a later time if needed.
+- Envelope [Cancel envelope](https://docs.api.signater.com/cancel-envelope-12252688e0.md): Cancels an envelope using its unique identifier, terminating its approval process. Once canceled, the envelope cannot be resumed, and all signers will no longer be able to approve or reject the documents. This action is irreversible and will permanently stop any further interactions with the envelope.
+- Envelope [Restore envelope](https://docs.api.signater.com/restore-envelope-12883372e0.md): Restores a previously remover envelope using its unique identifier. Restoring an envelope does not alter any characteristics such as its status, documents, or signers.
+- Envelope [Manual reinvite to review envelope](https://docs.api.signater.com/manual-reinvite-to-review-envelope-12252690e0.md): Manually sends a reminder email to the signers with 'ReadyToReview' status in the envelope. Signers without a registered email will not receive any notifications. For signers without email, the 'Generate signature-link' endpoint must be used to manually create a link for document signing. This operation does not interfere with the 'Review Reminder' or 'Expiration Reminder' features, which operate independently.
+- Envelope [Create signature link](https://docs.api.signater.com/create-signature-link-12252691e0.md): Creates a signature link for a signer in an envelope. This link allows the signer to access the document and complete the signing process. If the signer does not have a registered email, this endpoint provides a way to manually generate the link for their signature. The link is valid for a limited time and allows the signer to review and sign the document.
+- Template [Get template](https://docs.api.signater.com/get-template-12252694e0.md): Retrieves a template by its unique identifier. This endpoint allows you to access the template's content and fields configuration.
+- Template [Update template](https://docs.api.signater.com/update-template-12252695e0.md): Updates an existing template with new content, structure, or fields. This allows you to modify predefined elements of the template to reflect changes in document requirements. The updated template can then be used to create new documents and envelopes, ensuring that future documents align with the latest configuration and structure.
+- Template [Remove template](https://docs.api.signater.com/remove-template-12252696e0.md): Removes an existing template from the system. This operation is reversible, and the template can be restored if needed. Once removed, the template will no longer be available for creating new documents or envelopes unless restored.
+- Template [Create template](https://docs.api.signater.com/create-template-12252697e0.md): Creates a new template that can be used to generate documents and envelopes. Templates allow you to define predefined structures and fields, which can be reused across multiple documents, saving time and ensuring consistency in document creation. Once created, the template can be accessed and used to quickly generate new documents with the same configuration.
+- Template [Rename template](https://docs.api.signater.com/rename-template-12252698e0.md): Renames an existing template to a new name and/or description. This operation allows you to modify the template's name without altering its content, structure, or fields. The renamed template can continue to be used for creating new documents and envelopes, retaining all its predefined configurations and fields under the new name.
+- Template [Move template](https://docs.api.signater.com/move-template-12252699e0.md): Moves an existing template to another vault. This operation allows for better organization of templates across different vaults without altering their content, structure, or fields. The moved template retains all its configurations and can continue to be used for creating new documents and envelopes within the new vault.
+- Template [Restore template](https://docs.api.signater.com/restore-template-12252700e0.md): Restores a previously removed template from the 'trash'. This operation allows you to recover a template that was removed but not permanently deleted. Once restored, the template becomes available again for creating new documents and envelopes, with all its configurations intact.
+- Vault [Create vault](https://docs.api.signater.com/create-vault-12252701e0.md): Creates a new vault in the system. A vault is a secure storage container used to organize and store templates and envelopes. Vaults can have different access levels: personal vaults, which are accessible only to the user who created them; account vaults, which are accessible to all users within the account; and member based vaults, where access can be granted to specific members, allowing for granular control over who can view or modify the contents.
+- Vault [Update vault](https://docs.api.signater.com/update-vault-12252702e0.md): Updates the properties of an existing vault. Note that the access type of a vault cannot be changed once it is created. However, for vaults with 'member' access type, you can add or remove members, modifying who has access to the vault.
+- Vault [Update vault](https://docs.api.signater.com/update-vault-36651167e0.md): Replaces the full state of an existing vault. The access type may now be changed between UserAccount, Account and UserAccountGroup. When the resulting type is UserAccountGroup, MemberIds must contain at least one member (you must explicitly add yourself if you want to be a member).
+- Vault [Get vault](https://docs.api.signater.com/get-vault-12252703e0.md): Retrieves detailed information about a specific vault, identified by its unique ID. This includes the vault's configuration, access settings, and the list of the members.
+- Vault [Remove vault](https://docs.api.signater.com/remove-vault-12252704e0.md): Permanently removes a specific vault. This operation is irreversible and can only be performed if the vault does not contain any envelopes or templates. If the vault contains any content, the user must first remove or move the content to another(s) vault(s) before proceeding with the removal.
+- Vault [Get vault owners](https://docs.api.signater.com/get-vault-owners-12252705e0.md): Retrieves the list of owners for a specific vault. Vault owners are the users who have the highest level of access to the vault and can manage its settings, including adding or removing members (for vaults with 'member' access type).
+- Vault [Get vault members](https://docs.api.signater.com/get-vault-members-12252706e0.md): Retrieves the list of all users who have access to a specific vault. This includes not only members of the vault (users with explicit permissions to view or modify its contents), but also administrators who have access to the vault by default, regardless of being directly linked to it.
+- Vault [List account vaults](https://docs.api.signater.com/list-account-vaults-12252707e0.md): Retrieves a list of all vaults associated with the account. This includes vaults that are accessible to the account's users, regardless of their access level, and allows for easy management and organization of resources like templates and envelopes.
+- Vault [List current user vaults](https://docs.api.signater.com/list-current-user-vaults-12252708e0.md): Retrieves a list of vaults that are accessible to the currently authenticated user. This includes personal vaults, as well as shared or restricted vaults the user has access to, depending on their permissions.
+- Vault [List user vaults](https://docs.api.signater.com/list-user-vaults-12252709e0.md): Retrieves a list of vaults that are accessible to a specific user, identified by their user ID. This includes all vaults the user has access to, whether personal or shared, and based on their assigned permissions.
+- Vault [List vault](https://docs.api.signater.com/list-vault-12252710e0.md): Retrieves the contents of a specific vault, identified by its unique ID. This includes a list of envelopes and templates stored within the vault, allowing for easy management and access to the resources.
+- Vault [Favorite vault](https://docs.api.signater.com/favorite-vault-12252711e0.md): Favorites a specific vault for the currently authenticated user. This operation is personal to the user and does not affect other users' preferences within the account.
+- Vault [Unfavorite vault](https://docs.api.signater.com/unfavorite-vault-12252712e0.md): Removes the 'favorite' status from a specific vault for the currently authenticated user. This operation only affects the user's personal preferences and does not alter the vault's status for other users within the account.
+
+## Schemas
+- Schemas [PublishEnvelopeApiResponse](https://docs.api.signater.com/publishenvelopeapiresponse-4396821d0.md): 
+- [BadRequestApiResponse](https://docs.api.signater.com/badrequestapiresponse-4713938d0.md): 
+- [BadRequestApiResponseError](https://docs.api.signater.com/badrequestapiresponseerror-4713939d0.md): 
+- [ChangeEnvelopeUserAccountOwnerApiRequest](https://docs.api.signater.com/changeenvelopeuseraccountownerapirequest-4396761d0.md): 
+- [CreateContactApiRequest](https://docs.api.signater.com/createcontactapirequest-4396762d0.md): 
+- [CreateContactApiResponse](https://docs.api.signater.com/createcontactapiresponse-4396763d0.md): 
+- [CreateDocumentFromTemplateApiRequest](https://docs.api.signater.com/createdocumentfromtemplateapirequest-4396764d0.md): 
+- [CreateDocumentFromTemplateApiResponse](https://docs.api.signater.com/createdocumentfromtemplateapiresponse-4396765d0.md): 
+- [CreateDocumentFromTemplateFieldApiRequest](https://docs.api.signater.com/createdocumentfromtemplatefieldapirequest-4396766d0.md): 
+- [CreateDocumentFromTemplatePageSizeApiResponse](https://docs.api.signater.com/createdocumentfromtemplatepagesizeapiresponse-4396767d0.md): 
+- [CreateEnvelopeApiRequest](https://docs.api.signater.com/createenvelopeapirequest-4396768d0.md): 
+- [CreateEnvelopeApiResponse](https://docs.api.signater.com/createenvelopeapiresponse-4396769d0.md): 
+- [CreateEnvelopeDocumentApiRequest](https://docs.api.signater.com/createenvelopedocumentapirequest-4699006d0.md): 
+- [CreateEnvelopeSignerApiRequest](https://docs.api.signater.com/createenvelopesignerapirequest-4699007d0.md): 
+- [CreateEnvelopeSignerSignMarkApiRequest](https://docs.api.signater.com/createenvelopesignersignmarkapirequest-4699008d0.md): 
+- [CreateSignatureLinkApiResponse](https://docs.api.signater.com/createsignaturelinkapiresponse-4396773d0.md): 
+- [CreateVaultApiRequest](https://docs.api.signater.com/createvaultapirequest-4396777d0.md): 
+- [CreateTemplateApiRequest](https://docs.api.signater.com/createtemplateapirequest-4396774d0.md): 
+- [CreateVaultApiResponse](https://docs.api.signater.com/createvaultapiresponse-4396778d0.md): 
+- [CreateTemplateApiResponse](https://docs.api.signater.com/createtemplateapiresponse-4396775d0.md): 
+- [ForbiddenApiResponse](https://docs.api.signater.com/forbiddenapiresponse-4713940d0.md): 
+- [CreateTemplateFieldApiRequest](https://docs.api.signater.com/createtemplatefieldapirequest-4396776d0.md): 
+- [GetContactApiResponse](https://docs.api.signater.com/getcontactapiresponse-4396779d0.md): 
+- [GetDocumentOriginalFileUrlApiResponse](https://docs.api.signater.com/getdocumentoriginalfileurlapiresponse-4761772d0.md): 
+- [GetDocumentSignedFileUrlApiResponse](https://docs.api.signater.com/getdocumentsignedfileurlapiresponse-4761773d0.md): 
+- [GetEnvelopeApiResponse](https://docs.api.signater.com/getenvelopeapiresponse-4396780d0.md): 
+- [GetEnvelopeApiResponseDocument](https://docs.api.signater.com/getenvelopeapiresponsedocument-4396781d0.md): 
+- [GetEnvelopeApiResponseDocumentPageSize](https://docs.api.signater.com/getenvelopeapiresponsedocumentpagesize-4396782d0.md): 
+- [GetEnvelopeApiResponseSignMark](https://docs.api.signater.com/getenvelopeapiresponsesignmark-4396783d0.md): 
+- [GetEnvelopeApiResponseSigner](https://docs.api.signater.com/getenvelopeapiresponsesigner-4396784d0.md): 
+- [GetEnvelopeApiResponseSignerAction](https://docs.api.signater.com/getenvelopeapiresponsesigneraction-4396785d0.md): 
+- [GetEnvelopeCertificateFileApiResponse](https://docs.api.signater.com/getenvelopecertificatefileapiresponse-4761774d0.md): 
+- [GetTemplateApiResponse](https://docs.api.signater.com/gettemplateapiresponse-4396793d0.md): 
+- [GetTemplateFieldApiResponse](https://docs.api.signater.com/gettemplatefieldapiresponse-4396794d0.md): 
+- [GetVaultApiResponse](https://docs.api.signater.com/getvaultapiresponse-4396795d0.md): 
+- [GetVaultMembersApiResponse](https://docs.api.signater.com/getvaultmembersapiresponse-4396796d0.md): 
+- [GetVaultMembersApiResponseItem](https://docs.api.signater.com/getvaultmembersapiresponseitem-4396797d0.md): 
+- [ListAccountVaultsApiRequest](https://docs.api.signater.com/listaccountvaultsapirequest-4699009d0.md): 
+- [GetVaultOwnersApiResponse](https://docs.api.signater.com/getvaultownersapiresponse-4396798d0.md): 
+- [GetVaultOwnersApiResponseItem](https://docs.api.signater.com/getvaultownersapiresponseitem-4396799d0.md): 
+- [GetVaultUserAccountMemberApiResponse](https://docs.api.signater.com/getvaultuseraccountmemberapiresponse-4396800d0.md): 
+- [ListAccountVaultsApiResponse](https://docs.api.signater.com/listaccountvaultsapiresponse-4396801d0.md): 
+- [ListAccountVaultsApiResponseItem](https://docs.api.signater.com/listaccountvaultsapiresponseitem-4396802d0.md): 
+- [ListAccountVaultsApiResponseItemUserAccountMember](https://docs.api.signater.com/listaccountvaultsapiresponseitemuseraccountmember-4396803d0.md): 
+- [ListAvailableEnvelopeOwnersApiResponse](https://docs.api.signater.com/listavailableenvelopeownersapiresponse-4396804d0.md): 
+- [ListAvailableEnvelopeOwnersApiResponseItem](https://docs.api.signater.com/listavailableenvelopeownersapiresponseitem-4396805d0.md): 
+- [ListUserAccountVaultsApiRequest](https://docs.api.signater.com/listuseraccountvaultsapirequest-4699010d0.md): 
+- [ListContactsApiResponse](https://docs.api.signater.com/listcontactsapiresponse-4396806d0.md): 
+- [ListContactsApiResponseItem](https://docs.api.signater.com/listcontactsapiresponseitem-4396807d0.md): 
+- [ListUserAccountVaultsApiResponse](https://docs.api.signater.com/listuseraccountvaultsapiresponse-4396808d0.md): 
+- [ListUserAccountVaultsApiResponseItem](https://docs.api.signater.com/listuseraccountvaultsapiresponseitem-4396809d0.md): 
+- [ListUserAccountVaultsApiResponseItemUserAccountMember](https://docs.api.signater.com/listuseraccountvaultsapiresponseitemuseraccountmember-4396810d0.md): 
+- [ListVaultApiRequest](https://docs.api.signater.com/listvaultapirequest-4699011d0.md): 
+- [ListVaultApiResponse](https://docs.api.signater.com/listvaultapiresponse-4396811d0.md): 
+- [ListVaultApiResponseItem](https://docs.api.signater.com/listvaultapiresponseitem-4396812d0.md): 
+- [ListVaultApiResponseItemEnvelope](https://docs.api.signater.com/listvaultapiresponseitemenvelope-4396813d0.md): 
+- [ListVaultApiResponseItemEnvelopeSigner](https://docs.api.signater.com/listvaultapiresponseitemenvelopesigner-4396814d0.md): 
+- [ListVaultApiResponseItemTemplate](https://docs.api.signater.com/listvaultapiresponseitemtemplate-4396815d0.md): 
+- [ListVaultUserAccountMemberApiResponse](https://docs.api.signater.com/listvaultuseraccountmemberapiresponse-4396816d0.md): 
+- [ListVaultVaultApiResponse](https://docs.api.signater.com/listvaultvaultapiresponse-4396817d0.md): 
+- [Pagination](https://docs.api.signater.com/pagination-4396819d0.md): 
+- [ProcessEnvelopeCertificateApiRequest](https://docs.api.signater.com/processenvelopecertificateapirequest-4396820d0.md): 
+- [RenameEnvelopeApiRequest](https://docs.api.signater.com/renameenvelopeapirequest-4396822d0.md): 
+- [TemplateFieldConstraints](https://docs.api.signater.com/templatefieldconstraints-15406893d0.md): 
+- [MoveTemplateApiRequest](https://docs.api.signater.com/movetemplateapirequest-4396818d0.md): 
+- [TemplateFieldSchema](https://docs.api.signater.com/templatefieldschema-15406894d0.md): 
+- [TemplateFieldValue](https://docs.api.signater.com/templatefieldvalue-15406895d0.md): 
+- [UnauthorizedApiResponse](https://docs.api.signater.com/unauthorizedapiresponse-4713941d0.md): 
+- [RenameTemplateApiRequest](https://docs.api.signater.com/renametemplateapirequest-4396823d0.md): 
+- [UpdateContactApiRequest](https://docs.api.signater.com/updatecontactapirequest-4396826d0.md): 
+- [UpdateEnvelopeApiRequest](https://docs.api.signater.com/updateenvelopeapirequest-4396827d0.md): 
+- [RestoreTemplateApiRequest](https://docs.api.signater.com/restoretemplateapirequest-4396825d0.md): 
+- [UpdateEnvelopeDocumentApiRequest](https://docs.api.signater.com/updateenvelopedocumentapirequest-4699012d0.md): 
+- [UpdateEnvelopeSignerApiRequest](https://docs.api.signater.com/updateenvelopesignerapirequest-4699013d0.md): 
+- [UpdateEnvelopeSignerSignMarkApiRequest](https://docs.api.signater.com/updateenvelopesignersignmarkapirequest-4699014d0.md): 
+- [UpdateVaultApiRequest](https://docs.api.signater.com/updatevaultapirequest-4396833d0.md): 
+- [UploadDocumentApiResponse](https://docs.api.signater.com/uploaddocumentapiresponse-4396834d0.md): 
+- [UploadDocumentPageSizeApiResponse](https://docs.api.signater.com/uploaddocumentpagesizeapiresponse-4396835d0.md): 
+- [UpdateTemplateApiRequest](https://docs.api.signater.com/updatetemplateapirequest-4396831d0.md): 
+- [UpdateTemplateFieldApiRequest](https://docs.api.signater.com/updatetemplatefieldapirequest-4396832d0.md): 

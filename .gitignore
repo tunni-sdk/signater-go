@@ -1,0 +1,13 @@
+# Test artifacts
+*.out
+coverage.html
+*.test
+
+# Editor/OS
+.idea/
+.vscode/
+.DS_Store
+
+# Env
+.env
+.env.*
