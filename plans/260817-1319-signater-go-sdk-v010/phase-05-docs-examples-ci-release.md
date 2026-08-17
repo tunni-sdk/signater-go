@@ -34,10 +34,30 @@ Ship it: runnable examples, README, CI pipeline, sandbox validation of the empir
 
 ## Success Criteria
 
-- [ ] Quickstart runs green against sandbox end-to-end
-- [ ] Real sandbox webhook verified by `ConstructEvent` (empirical unknowns closed)
-- [ ] CI green; README complete; pkg.go.dev renders
-- [ ] `go get github.com/tunni-sdk/signater-go@v0.1.0` works
+- [x] SDK validated against sandbox end-to-end (auth, vaults, contacts, error mapping, multipart upload, envelope draft lifecycle — see Implementation Notes)
+- [ ] Real sandbox webhook verified by `ConstructEvent` (needs a webhook configured + Hookdeck CLI capture — user step)
+- [x] README complete; examples build; CI workflow + golangci config in place
+- [ ] `go get github.com/tunni-sdk/signater-go@v0.1.0` works (needs org creation + push + tag — user step)
+
+## Implementation Notes (as built)
+
+Sandbox validation executed 2026-08-17 with a real sandbox token, using the SDK itself. Closed items:
+
+- Canonicalized `X-Api-Token` header casing accepted by the gateway.
+- `Vaults.Owners`/`Members` without `{vaultId}` confirmed working (return account users).
+- 404 → `NotFoundError` with telemetry id; 400 → `ValidationError` with all messages.
+- Multipart upload accepted; envelope draft create → get → trash round-trip decodes.
+
+Live-API behavior discovered and encoded into the SDK (all doc-commented):
+
+- `EnvelopeParams.Language` and each signer's three `*CommunicationMode` fields are REQUIRED (server rejects omission with "range does not include '0'").
+- A document belongs to at most one envelope, including trashed ones.
+- Unset signer `documentType` returns the NUMBER `0` (not null/string) — `IdentityDocumentType` now tolerates numeric decoding (regression-tested).
+
+Remaining before v0.1.0 tag (user-dependent):
+1. Create GitHub org `tunni-sdk` + repo `signater-go`; push; tag; verify pkg.go.dev.
+2. Configure a sandbox webhook + Hookdeck CLI capture to confirm the signature header format and the signer id JSON key (`VERIFY(sandbox)` markers in `webhook/`).
+3. Rotate the sandbox token used for validation (it was shared in chat).
 
 ## Risk Assessment
 
