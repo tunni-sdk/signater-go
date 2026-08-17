@@ -34,6 +34,17 @@ const (
 // Client is the entry point to the Signater API. Create one with NewClient.
 // A Client is safe for concurrent use by multiple goroutines.
 type Client struct {
+	// Contacts accesses the Contact endpoints.
+	Contacts *ContactService
+	// Documents accesses the Document endpoints.
+	Documents *DocumentService
+	// Envelopes accesses the Envelope endpoints.
+	Envelopes *EnvelopeService
+	// Templates accesses the Template endpoints.
+	Templates *TemplateService
+	// Vaults accesses the Vault endpoints.
+	Vaults *VaultService
+
 	httpClient     *http.Client
 	baseURL        *url.URL
 	apiToken       string
@@ -69,5 +80,10 @@ func NewClient(opts ...Option) *Client {
 	if c.apiToken == "" {
 		c.apiToken = os.Getenv(envAPIToken)
 	}
+	c.Contacts = &ContactService{client: c}
+	c.Documents = &DocumentService{client: c}
+	c.Envelopes = &EnvelopeService{client: c}
+	c.Templates = &TemplateService{client: c}
+	c.Vaults = &VaultService{client: c}
 	return c
 }

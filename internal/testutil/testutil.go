@@ -12,6 +12,8 @@ import (
 // RecordedRequest captures the relevant parts of a request seen by Transport.
 type RecordedRequest struct {
 	Method string
+	// Path is the escaped path as sent on the wire (URL.EscapedPath), so
+	// percent-encoded segments remain visible to assertions.
 	Path   string
 	Query  string
 	Header http.Header
@@ -82,7 +84,7 @@ func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 	t.mu.Lock()
 	t.requests = append(t.requests, RecordedRequest{
 		Method: req.Method,
-		Path:   req.URL.Path,
+		Path:   req.URL.EscapedPath(),
 		Query:  req.URL.RawQuery,
 		Header: req.Header.Clone(),
 		Body:   body,
