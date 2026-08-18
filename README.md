@@ -2,9 +2,8 @@
 
 [![CI](https://github.com/tunni-sdk/signater-go/actions/workflows/ci.yml/badge.svg)](https://github.com/tunni-sdk/signater-go/actions/workflows/ci.yml)
 [![Go Reference](https://pkg.go.dev/badge/github.com/tunni-sdk/signater-go.svg)](https://pkg.go.dev/github.com/tunni-sdk/signater-go)
-[![Go Report Card](https://goreportcard.com/badge/github.com/tunni-sdk/signater-go)](https://goreportcard.com/report/github.com/tunni-sdk/signater-go)
 
-A Go SDK for the [Signater](https://docs.api.signater.com) e-signature API. Covers the complete published API surface — contacts, documents, envelopes, templates and vaults (50 endpoints) — plus webhook signature verification. Zero dependencies outside the standard library. Requires Go 1.23+.
+A Go SDK for the [Signater](https://docs.api.signater.com) e-signature API. Covers the complete published API surface — contacts, documents, envelopes, templates and vaults (50 endpoints) — plus webhook verification and typed events. Zero dependencies outside the standard library. Requires Go 1.23+.
 
 ## Installation
 

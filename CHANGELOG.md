@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-08-18
+
 ### Changed
 
 - `webhook.RequestID` falls back to the `X-Hookdeck-Eventid` header: captured
@@ -40,5 +42,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Functional client options: `WithAPIToken`, `WithBaseURL`, `WithHTTPClient`,
   `WithMaxRetries`, `WithRequestTimeout`, `WithLogger`, `WithUserAgent`.
 
-[Unreleased]: https://github.com/tunni-sdk/signater-go/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/tunni-sdk/signater-go/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/tunni-sdk/signater-go/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/tunni-sdk/signater-go/releases/tag/v0.1.0
