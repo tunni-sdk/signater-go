@@ -55,9 +55,13 @@ Live-API behavior discovered and encoded into the SDK (all doc-commented):
 - Unset signer `documentType` returns the NUMBER `0` (not null/string) — `IdentityDocumentType` now tolerates numeric decoding (regression-tested).
 
 Remaining before v0.1.0 tag (user-dependent):
-1. Create GitHub org `tunni-sdk` + repo `signater-go`; push; tag; verify pkg.go.dev.
-2. Configure a sandbox webhook + Hookdeck CLI capture to confirm the signature header format and the signer id JSON key (`VERIFY(sandbox)` markers in `webhook/`).
-3. Rotate the sandbox token used for validation (it was shared in chat).
+1. ~~Create GitHub org `tunni-sdk` + repo `signater-go`; push; tag; verify pkg.go.dev.~~ Done 2026-08-17/18: repo made public, `go get @v0.1.0` resolves via proxy.golang.org, pkg.go.dev indexed, GitHub Release created. Go Report Card is a dead check — the service shows "retired".
+2. ~~Configure a sandbox webhook + Hookdeck CLI capture~~ Done 2026-08-18 (dashboard no longer has CLI Settings; used a regular webhook → localhost tunnel). Captured all lifecycle + `*_by_signer` events; every `VERIFY(sandbox)` marker closed (commit 36f13a3):
+   - `signer_id` is the payload key on `*_by_signer` events.
+   - `X-Hookdeck-Signature` header confirmed in name/format only (base64 32-byte); the HMAC scheme is unverifiable — Signater's UI exposes no signing secret. Practical verification is the static `X-Signater-Apikey` header (distinct value from the API token); SDK docs/example now default to `VerifyAPIKey`.
+   - No `request-id` header on real deliveries; `webhook.RequestID` falls back to `X-Hookdeck-Eventid` (stable across retries).
+   - `Envelopes.ProcessCertificate` empty-object body accepted; `Vaults.Owners`/`Members` re-confirmed.
+3. Rotate the sandbox token used for validation (it was shared in chat — twice). **Still open, user action.**
 
 ## Risk Assessment
 

@@ -14,13 +14,13 @@ cannot create/push to the org — use SSH for git operations).
 
 ## Open items (in priority order)
 
-1. **Rotate the sandbox token** `15a3...8223` — it was pasted in a chat session; treat as exposed. Generate a new one at app.signater.com → API Tokens.
-2. **Webhook empirical capture** — the only remaining `VERIFY(sandbox)` markers (grep `VERIFY(sandbox)` in `webhook/webhook.go` and `vault.go`):
-   - Confirm Hookdeck signature header name/format (assumed `X-Hookdeck-Signature[-2]`, base64 HMAC-SHA256 of raw body).
-   - Confirm the signer id JSON key on `*_by_signer` events (assumed `signer_id`; `Event.Raw` preserves the payload as a hedge).
-   - How: configure a sandbox webhook at app.signater.com/account/webhooks, run `hookdeck listen 8080` + `examples/webhook-server`, publish a sandbox envelope, inspect the delivery.
-3. **Post-release checks**: CI run on GitHub Actions (first push triggered it), pkg.go.dev indexing (`go get github.com/tunni-sdk/signater-go@v0.1.0` from a clean module), Go Report Card.
-4. Optional: create a GitHub Release for the `v0.1.0` tag using the CHANGELOG entry.
+All 2026-08-17 items closed on 2026-08-18 (commits 4c9b18b..36f13a3) except token rotation:
+
+1. **Rotate the sandbox token** `15a3...8223` — pasted in chat twice now; treat as exposed. Generate a new one at app.signater.com → API Tokens. **Still open, user action.**
+2. ~~Webhook empirical capture~~ — done; all `VERIFY(sandbox)` markers closed. Findings (also in README "API knowledge baked in" and phase-05 notes): `signer_id` confirmed; no signing secret exposed by the UI so `VerifyAPIKey` is the practical check; real deliveries have no `request-id` header → `RequestID` falls back to `X-Hookdeck-Eventid`. The dashboard no longer offers "CLI Settings"; capture used a regular webhook pointed at a tunnel.
+3. ~~Post-release checks~~ — CI green (lint fixed by migrating to golangci-lint v2/action@v8, which surfaced and closed 14 findings), repo made **public**, pkg.go.dev indexed, `go get @v0.1.0` resolves from a clean module. Go Report Card no longer exists (service retired).
+4. ~~GitHub Release~~ — created from the CHANGELOG: https://github.com/tunni-sdk/signater-go/releases/tag/v0.1.0
+5. New (left for a future session): the sandbox webhook named "SDK capture" in the dashboard points at a dead tunnel URL — deactivate or repoint it. Unreleased CHANGELOG entries exist; cut v0.1.1 when convenient.
 
 ## Key decisions to not re-litigate (verified; see review-audit rules)
 
