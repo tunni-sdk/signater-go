@@ -99,18 +99,21 @@ Transient failures are retried automatically (default 2 retries, exponential bac
 
 ## Webhooks
 
-The [`webhook`](webhook) package verifies and parses deliveries (sent via Hookdeck):
+The [`webhook`](webhook) package verifies and parses deliveries (sent via Hookdeck). The webhook configuration page does not currently expose the Hookdeck signing secret, so verify with the static `x-signater-apikey` header sent on every delivery (pin its value from a captured one). Note the trade-off: the key does not cover the payload and travels inside every request, so serve webhooks over HTTPS, keep the key out of logs, and always re-query the API before acting on an event.
 
 ```go
 import "github.com/tunni-sdk/signater-go/webhook"
 
 payload, err := io.ReadAll(http.MaxBytesReader(w, r.Body, 1<<20))
-event, err := webhook.ConstructEvent(payload, r.Header, secret)
+if err := webhook.VerifyAPIKey(r.Header, apiKey); err != nil { /* reject */ }
+event, err := webhook.ParseEvent(payload)
 switch event.Type {
 case webhook.EventEnvelopeSigned:
     // ...
 }
 ```
+
+If you do have a signing secret, `webhook.ConstructEvent(payload, r.Header, secret)` verifies the HMAC signature (which also covers the payload) and parses in one call.
 
 Deliveries are at-least-once and unordered: dedupe by `webhook.RequestID(r.Header)` and query the API for the current resource state. Test your handler with `webhook.SignPayload`.
 
@@ -122,6 +125,8 @@ The SDK encodes behavior verified against the live sandbox that the API referenc
 - A document can belong to only one envelope (even a trashed one) — upload one document per envelope.
 - Unset signer `documentType` comes back as the number `0`; the SDK decodes it as the empty string.
 - Rate limit: 1,000 requests/minute.
+- Webhook deliveries (captured in sandbox) carry `X-Hookdeck-Signature` (a base64 32-byte value; the HMAC scheme itself is unverifiable while no signing secret is exposed) and `X-Signater-Apikey` (static per-account key, distinct from the API token), but no `request-id` header — dedupe by `X-Hookdeck-Eventid`, which `webhook.RequestID` falls back to.
+- `*_by_signer` events include the signer as `signer_id` in the payload.
 
 ## License
 

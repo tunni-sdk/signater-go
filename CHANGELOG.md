@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- `webhook.RequestID` falls back to the `X-Hookdeck-Eventid` header: captured
+  sandbox deliveries carry no `request-id` header, and the Hookdeck event id
+  is stable across retry attempts, making it the practical dedupe key.
+- Webhook docs and the `webhook-server` example now verify deliveries with
+  `VerifyAPIKey` by default: the Signater webhook page does not currently
+  expose the Hookdeck signing secret, so the static `x-signater-apikey`
+  header is the strongest check available. Sandbox captures confirmed the
+  `X-Hookdeck-Signature` header name/format and the `signer_id` payload key
+  on `*_by_signer` events.
+
 ## [0.1.0] - 2026-08-17
 
 ### Added

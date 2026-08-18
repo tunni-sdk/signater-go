@@ -115,6 +115,29 @@ func TestParseEventPreservesRaw(t *testing.T) {
 	}
 }
 
+func TestParseEventCapturedDelivery(t *testing.T) {
+	// Verbatim envelope.rejected_by_signer body captured from a sandbox
+	// delivery (test-account ids): pins the real field order and the
+	// signer_id key.
+	payload := `{"signer_id":"94e17fc4-b5b3-4bc7-a151-23e4016dd77e","envelope_id":"504e8611-9614-4fc9-8a9f-710416afe73a","event_type":"envelope.rejected_by_signer","account_id":"6d4aaa08-4339-4214-85c8-1668af222d90","env":"sandbox"}`
+	e, err := ParseEvent([]byte(payload))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if e.Type != EventEnvelopeRejectedBySigner {
+		t.Errorf("Type = %q", e.Type)
+	}
+	if e.EnvelopeID != "504e8611-9614-4fc9-8a9f-710416afe73a" {
+		t.Errorf("EnvelopeID = %q", e.EnvelopeID)
+	}
+	if e.SignerID != "94e17fc4-b5b3-4bc7-a151-23e4016dd77e" {
+		t.Errorf("SignerID = %q", e.SignerID)
+	}
+	if e.AccountID != "6d4aaa08-4339-4214-85c8-1668af222d90" || e.Env != "sandbox" {
+		t.Errorf("AccountID = %q, Env = %q", e.AccountID, e.Env)
+	}
+}
+
 func TestRequestID(t *testing.T) {
 	h := http.Header{}
 	h.Set("request-id", "|6b1bc96c.09a8251c.")
@@ -123,6 +146,20 @@ func TestRequestID(t *testing.T) {
 	}
 	if got := RequestID(http.Header{}); got != "" {
 		t.Errorf("RequestID(empty) = %q", got)
+	}
+
+	// Sandbox deliveries carry no request-id header, only the Hookdeck
+	// event id, which is stable across retry attempts.
+	h = http.Header{}
+	h.Set("X-Hookdeck-Eventid", "evt_DmI9ifFa9PAj1qmhtE")
+	if got := RequestID(h); got != "evt_DmI9ifFa9PAj1qmhtE" {
+		t.Errorf("RequestID(eventid fallback) = %q", got)
+	}
+
+	// request-id wins when both are present.
+	h.Set("request-id", "primary")
+	if got := RequestID(h); got != "primary" {
+		t.Errorf("RequestID(both) = %q", got)
 	}
 }
 

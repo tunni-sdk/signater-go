@@ -453,8 +453,8 @@ func (s *EnvelopeService) CertificateFileURL(ctx context.Context, id string) (st
 // whenever necessary.
 func (s *EnvelopeService) ProcessCertificate(ctx context.Context, id string) error {
 	// The spec declares an (empty) JSON request body for this verb — the only
-	// lifecycle verb that does — so send {} to satisfy body-required bindings.
-	// VERIFY(sandbox): confirm the API accepts/expects the empty object.
+	// lifecycle verb that does — so send {} to satisfy body-required bindings;
+	// the sandbox API accepts the empty object.
 	return s.client.do(ctx, http.MethodPost, "/v1/ecm/envelopes/"+pathEscape(id)+"/certificate", nil, struct{}{}, nil)
 }
 

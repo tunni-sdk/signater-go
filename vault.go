@@ -191,9 +191,9 @@ func (s *VaultService) Remove(ctx context.Context, id string) error {
 
 // Owners retrieves the users eligible to own vaults.
 //
-// VERIFY(sandbox): the documented path takes no vault id even though the
-// endpoint description mentions "a specific vault"; confirmed against the
-// published OpenAPI fragment as /v1/ecm/vaults/owners.
+// The path takes no vault id even though the endpoint description mentions
+// "a specific vault" — it matches the published OpenAPI fragment and the
+// sandbox API serves it account-wide.
 func (s *VaultService) Owners(ctx context.Context) ([]AccountUser, error) {
 	var out struct {
 		Items []AccountUser `json:"items"`
@@ -206,9 +206,9 @@ func (s *VaultService) Owners(ctx context.Context) ([]AccountUser, error) {
 
 // Members retrieves the users with vault access, including administrators.
 //
-// VERIFY(sandbox): the documented path takes no vault id even though the
-// endpoint description mentions "a specific vault"; confirmed against the
-// published OpenAPI fragment as /v1/ecm/vaults/members.
+// The path takes no vault id even though the endpoint description mentions
+// "a specific vault" — it matches the published OpenAPI fragment and the
+// sandbox API serves it account-wide.
 func (s *VaultService) Members(ctx context.Context) ([]AccountUser, error) {
 	var out struct {
 		Items []AccountUser `json:"items"`
