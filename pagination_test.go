@@ -74,7 +74,7 @@ func TestAutoPagingExactPageBoundary(t *testing.T) {
 }
 
 func TestAutoPagingNilPage(t *testing.T) {
-	fetch := func(page int) (*Page[int], error) { return nil, nil }
+	fetch := func(_ int) (*Page[int], error) { return nil, nil }
 	count := 0
 	for _, err := range autoPaging(1, fetch) {
 		if err != nil {
@@ -91,7 +91,7 @@ func TestAutoPagingMissingPaginationMetadata(t *testing.T) {
 	// A non-empty page with a zero-valued pagination block must stop after
 	// one fetch instead of looping forever.
 	var calls int
-	fetch := func(page int) (*Page[int], error) {
+	fetch := func(_ int) (*Page[int], error) {
 		calls++
 		return &Page[int]{Items: []int{1, 2, 3}}, nil
 	}

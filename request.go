@@ -75,7 +75,7 @@ func (c *Client) do(ctx context.Context, method, path string, query url.Values, 
 	}
 
 	for attempt := 0; ; attempt++ {
-		resp, respBody, err := c.attempt(ctx, method, u.String(), payload)
+		resp, respBody, err := c.attempt(ctx, method, u.String(), payload) //nolint:bodyclose // attempt fully reads and closes the body
 		if err != nil {
 			// Transport-level failure: the request may or may not have reached
 			// the server, so only idempotent methods are retried.
@@ -241,7 +241,7 @@ func (c *Client) doRedirectURL(ctx context.Context, path string) (string, error)
 	fullURL := c.baseURL.JoinPath(path).String()
 
 	for attempt := 0; ; attempt++ {
-		resp, respBody, err := c.redirectAttempt(ctx, &hc, fullURL)
+		resp, respBody, err := c.redirectAttempt(ctx, &hc, fullURL) //nolint:bodyclose // redirectAttempt fully reads and closes the body
 		if err != nil {
 			if ctx.Err() == nil && attempt < c.maxRetries {
 				if serr := c.retrySleep(ctx, attempt, 0, http.MethodGet, err.Error()); serr == nil {

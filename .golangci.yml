@@ -1,20 +1,30 @@
+version: "2"
+
 linters:
   enable:
-    - errcheck
-    - govet
-    - ineffassign
-    - staticcheck
-    - unused
+    - bodyclose
+    - errorlint
+    - gosec
     - misspell
     - revive
-    - gosec
-    - errorlint
-    - bodyclose
-
-issues:
-  exclude-rules:
-    # Test helpers intentionally ignore Close/Write errors on scripted fakes.
-    - path: _test\.go
-      linters:
-        - errcheck
-        - gosec
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      # Example programs log webhook fields with %q, which escapes control
+      # characters; gosec's taint analysis does not model %q as sanitization.
+      - path: ^examples/
+        linters:
+          - gosec
+        text: "G706"
+      # Test helpers intentionally ignore Close/Write errors on scripted
+      # fakes and build synthetic *http.Response values without bodies.
+      - path: _test\.go
+        linters:
+          - bodyclose
+          - errcheck
+          - gosec

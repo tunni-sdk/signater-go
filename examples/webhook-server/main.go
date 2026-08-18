@@ -18,6 +18,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/tunni-sdk/signater-go/webhook"
 )
@@ -39,25 +40,26 @@ func main() {
 		}
 		event, err := webhook.ConstructEvent(payload, r.Header, secret)
 		if err != nil {
-			log.Printf("rejected delivery %s: %v", webhook.RequestID(r.Header), err)
+			log.Printf("rejected delivery %q: %v", webhook.RequestID(r.Header), err)
 			http.Error(w, "bad request", http.StatusBadRequest)
 			return
 		}
 
 		// Deliveries are at-least-once and unordered: dedupe by request id
 		// and query the API for the envelope's current state before acting.
-		log.Printf("event %s envelope=%s env=%s request-id=%s",
+		log.Printf("event %q envelope=%q env=%q request-id=%q",
 			event.Type, event.EnvelopeID, event.Env, webhook.RequestID(r.Header))
 
 		switch event.Type {
 		case webhook.EventEnvelopeSigned:
-			log.Printf("envelope %s fully signed!", event.EnvelopeID)
+			log.Printf("envelope %q fully signed!", event.EnvelopeID)
 		case webhook.EventEnvelopeRejectedBySigner:
-			log.Printf("envelope %s rejected by signer %s", event.EnvelopeID, event.SignerID)
+			log.Printf("envelope %q rejected by signer %q", event.EnvelopeID, event.SignerID)
 		}
 		w.WriteHeader(http.StatusNoContent)
 	})
 
 	log.Printf("listening on %s", *addr)
-	log.Fatal(http.ListenAndServe(*addr, nil))
+	server := &http.Server{Addr: *addr, ReadHeaderTimeout: 10 * time.Second}
+	log.Fatal(server.ListenAndServe())
 }

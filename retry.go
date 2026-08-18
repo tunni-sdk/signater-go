@@ -62,7 +62,7 @@ func backoffDelay(attempt int, base, retryAfter time.Duration) time.Duration {
 			ceiling = d
 		}
 	}
-	return rand.N(ceiling + 1)
+	return rand.N(ceiling + 1) //nolint:gosec // retry jitter has no security requirement
 }
 
 // sleepCtx sleeps for d or until ctx is done, returning ctx.Err() in that case.

@@ -2,6 +2,7 @@ package signater
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
@@ -89,7 +90,7 @@ func TestDoMissingToken(t *testing.T) {
 	t.Setenv(envAPIToken, "")
 	c := NewClient()
 	err := c.do(context.Background(), http.MethodGet, "/v1/ecm/contacts", nil, nil, nil)
-	if err != errMissingToken {
+	if !errors.Is(err, errMissingToken) {
 		t.Fatalf("err = %v, want errMissingToken", err)
 	}
 }

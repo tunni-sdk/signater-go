@@ -19,7 +19,7 @@ const (
 
 	apiTokenHeader = "x-api-token"
 	// envAPIToken is the environment variable read when WithAPIToken is not used.
-	envAPIToken = "SIGNATER_API_TOKEN"
+	envAPIToken = "SIGNATER_API_TOKEN" //nolint:gosec // variable name, not a credential
 )
 
 // Client is the entry point to the Signater API. Create one with NewClient.

@@ -88,7 +88,7 @@ const (
 	// hookdeckSignature2Header carries the signature for a rotated secret.
 	hookdeckSignature2Header = "X-Hookdeck-Signature-2"
 	// apiKeyHeader carries the Signater account api key.
-	apiKeyHeader = "X-Signater-Apikey"
+	apiKeyHeader = "X-Signater-Apikey" //nolint:gosec // header name, not a credential
 )
 
 // Verification errors.

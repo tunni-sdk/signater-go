@@ -3,6 +3,7 @@ package signater
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"testing"
 )
@@ -200,7 +201,7 @@ func TestContactIDIsPathEscaped(t *testing.T) {
 func TestEmptyIDIsRejectedClientSide(t *testing.T) {
 	c, tr := newTestClient(t)
 	_, err := c.Contacts.Get(context.Background(), "")
-	if err != errEmptyResourceID {
+	if !errors.Is(err, errEmptyResourceID) {
 		t.Fatalf("err = %v, want errEmptyResourceID", err)
 	}
 	// The empty-id error must fire before any request reaches the wire.
